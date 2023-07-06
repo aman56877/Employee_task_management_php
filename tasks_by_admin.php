@@ -2,25 +2,29 @@
 
 require_once 'db_connection.php';
 
-$activePage = 'employees';
-
 session_start();
-if(!isset($_SESSION['email'])|| $_SESSION['loggedin'] !== true){
+if(!isset($_SESSION['email']) || $_SESSION['loggedin']!== true){
     header("location:login.php");
 }
 
-$query = "SELECT * FROM registrationdata WHERE (role = 'manager' OR role = 'user' OR role = 'admin') AND verification_status = 'verified'";
-$result = mysqli_query($conn, $query);
-$users = array();
+$activePage = 'tasks';
 
-if($result){
-    while ($row = mysqli_fetch_assoc($result)){
-        $users[] = $row;
+$query = "SELECT * FROM registrationdata WHERE role = 'manager' AND verification_status = 'verified'";
+$resultforAllManagers = mysqli_query($conn, $query);
+$allManagers = array();
+
+if($resultforAllManagers){
+    while($row = mysqli_fetch_assoc($resultforAllManagers)){
+        $allManagers[] = $row;
     }
 }else{
-    echo "Database error:" . mysqli_error($conn);
+    echo "Error";
 }
+
+
+
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -55,34 +59,27 @@ if($result){
                     <th>S.No.</th>
                     <th>Name</th>
                     <th>Department</th>
-                    <th>Role</th>
-                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 <?php
                 $serialNumber = 1;
-                 foreach($users as $user): 
+                 foreach($allManagers as $user): 
                  ?>
                 <tr>
                     <td> <?php echo $serialNumber ?> </td>
-                    <td><a href="employee_infobyVarified_employeePage.php?token=<?php echo $user['token']; ?>" style="color: black;"
-                            title="<?php echo ($user['name']); ?>"><?php echo ucfirst($user['name']);?>
-                        </a></td>
+                    <td> <a style="color: black;" href="assign_tasks_by_admin.php?token=<?php echo $user['token']; ?>"> <?php echo $user['name']; ?> </a> </td>
                     <td>
-                    <?php
-                    if($user['department']=== 'it_dept'){
+                    <?php 
+                    if($user['department'] === 'it_dept'){ 
                         echo "Information and Technology";
-                    }elseif($user['department']=== 'hr_dept'){
+                    }elseif($user['department'] === 'hr_dept'){
                         echo "Human Resource";
-                    }elseif($user['department']=== 'finance_dept'){
+                    }elseif($user['department'] === 'finance_dept'){
                         echo "Finance";
                     }
-                    
                     ?> 
                     </td>
-                    <td><?php  echo ucfirst($user['role']) ?> </td>
-                    <td> <?php  echo ucfirst($user['verification_status']) ?> </td>
                 </tr>
                 <?php
                 $serialNumber++;
@@ -90,15 +87,6 @@ if($result){
                  ?>
             </tbody>
         </table>
-        <?php
-            
-            if(isset($_SESSION['success'])){
-                echo $_SESSION['success'];
-                unset($_SESSION['success']);
-            }else{ 
-                echo '';
-            }
-            ?>
     </div>
     <!-- Table ends -->
 
@@ -117,14 +105,5 @@ if($result){
         $('#myTable').DataTable();
     });
     </script>
-
-
-
-
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
-    </script>
 </body>
-
 </html>

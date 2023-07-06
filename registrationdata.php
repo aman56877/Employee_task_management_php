@@ -67,6 +67,7 @@ if(isset($_POST['checkboxT&C'])){
 $email = mysqli_real_escape_string($conn, $_POST['email']);
 $name = mysqli_real_escape_string($conn, $_POST['name']);
 $role = mysqli_real_escape_string($conn, $_POST['role']);
+$department = mysqli_real_escape_string($conn, $_POST['department']);
 $defaultImage = 'images/default_profile.jpg';
 $password = mysqli_real_escape_string($conn, $_POST['password']);
 if (strlen($password) < 8) {
@@ -143,11 +144,23 @@ elseif(strpos($email, '@')===false){
 elseif(!preg_match('/^\d{10}$/', $number)){
     $errormessageforInvalidNumber = "This number is not valid";
     header("location:register.php?errormessageforInvalidNumber=" . urlencode($errormessageforInvalidNumber));
+}elseif($role === 'admin'){
+    $query= "INSERT INTO registrationdata (email, name, number, password, role,  country, state, city, zip, isp, ipAddress, token, profile,  created_at, updated_at)
+                VALUES ('$email', '$name', '$number', '$hashedPassword', '$role',  '$country', '$state', '$city', '$zip', '$isp', '$query', '$token', '$defaultImage', '$timestamp', '$timestamp')";
+
+    $successful = mysqli_query($conn, $query);
+
+    if ($successful) {
+        header("location:register.php?status=success");
+    } else {
+        header("location:register.php?status=error");
+    }
+    exit();
 }
 
 else{
-    $query= "INSERT INTO registrationdata (email, name, number, password, role, country, state, city, zip, isp, ipAddress, token, profile,  created_at, updated_at)
-                VALUES ('$email', '$name', '$number', '$hashedPassword', '$role', '$country', '$state', '$city', '$zip', '$isp', '$query', '$token', '$defaultImage', '$timestamp', '$timestamp')";
+    $query= "INSERT INTO registrationdata (email, name, number, password, role, department, country, state, city, zip, isp, ipAddress, token, profile,  created_at, updated_at)
+                VALUES ('$email', '$name', '$number', '$hashedPassword', '$role', '$department', '$country', '$state', '$city', '$zip', '$isp', '$query', '$token', '$defaultImage', '$timestamp', '$timestamp')";
 
     $successful = mysqli_query($conn, $query);
 

@@ -4,6 +4,7 @@
 
 $name = $_SESSION['name'];
 
+
 ?>
 
 
@@ -27,7 +28,7 @@ $name = $_SESSION['name'];
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link <?php echo ($activePage === 'dashboard') ? 'active': ''; ?>"" aria-current="
+                    <a class="nav-link <?php echo ($activePage === 'dashboard') ? 'active': ''; ?>" aria-current="
                         page" href="admin.php">Dashboard</a>
                 </li>
                 <li class="nav-item dropdown">
@@ -36,12 +37,9 @@ $name = $_SESSION['name'];
                         Departments
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Action</a></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                        <li><a class="dropdown-item" href="it_dept.php">IT Department</a></li>
+                        <li><a class="dropdown-item" href="hr_dept.php">HR Department</a></li>
+                        <li><a class="dropdown-item" href="finance_dept.php">Finance Department</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
@@ -64,7 +62,7 @@ $name = $_SESSION['name'];
                         Tasks
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="tasks_by_admin.php">Assign Tasks</a></li>
                         <li><a class="dropdown-item" href="#">Another action</a></li>
                         <li>
                             <hr class="dropdown-divider">

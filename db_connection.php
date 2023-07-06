@@ -11,7 +11,7 @@ if (!$conn) {
 $db = mysqli_select_db($conn, 'etm');
 
 if(!$db){
-    die("Databae not selected");
+    die("Database not selected");
 }
 
 ?>

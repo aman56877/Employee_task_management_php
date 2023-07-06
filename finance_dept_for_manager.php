@@ -1,27 +1,34 @@
 <?php
 
-require_once 'db_connection.php';
 
-// variable to make the employees page active while on it.
-$activePage = 'employees';
-
+// error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 session_start();
-if(!isset($_SESSION['email'])|| $_SESSION['loggedin'] !== true){
+if(!isset($_SESSION['email']) || $_SESSION['manager_page']!==true){
     header("location:login.php");
 }
 
-$query = "SELECT * FROM registrationdata WHERE (role = 'manager' OR role = 'user' OR role = 'admin') AND verification_status = 'unverify'";
-$result = mysqli_query($conn, $query);
-$users = array();
+require_once 'db_connection.php';
 
-if($result){
-    while ($row = mysqli_fetch_assoc($result)){
-        $users[] = $row;
-    }
-}else{
-    echo "Database error:" . mysqli_error($conn);
-}
+$activePage = 'departments';
+
+$query = "SELECT * from finance_dept WHERE position = 'manager'";
+$users = mysqli_query($conn, $query);
+
+$user = mysqli_fetch_assoc($users);
+
+
+
+
+
+
+
+
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -45,7 +52,7 @@ if($result){
 
 <body>
     <!-- navbar -->
-    <?php include 'navbar.php'; ?>
+    finance
     <!-- Navbar finished -->
 
 
@@ -56,9 +63,7 @@ if($result){
                 <tr>
                     <th>S.No.</th>
                     <th>Name</th>
-                    <th>Requested Department</th>
-                    <th>Requested Role</th>
-                    <th>Status</th>
+                    <th>Role</th>
                 </tr>
             </thead>
             <tbody>
@@ -68,23 +73,8 @@ if($result){
                  ?>
                 <tr>
                     <td> <?php echo $serialNumber ?> </td>
-                    <td><a href="employee_info.php?token=<?php echo $user['token']; ?>" style="color: black;"
-                            title="<?php echo ($user['name']); ?>"><?php echo ucfirst($user['name']);?>
-                        </a></td>
-                        <td>
-                    <?php
-                    if($user['department']=== 'it_dept'){
-                        echo "Information and Technology";
-                    }elseif($user['department']=== 'hr_dept'){
-                        echo "Human Resource";
-                    }elseif($user['department']=== 'finance_dept'){
-                        echo "Finance";
-                    }
-                    
-                    ?> 
-                    </td>
-                    <td><?php  echo ucfirst($user['role']) ?> </td>
-                    <td> <?php  echo ucfirst($user['verification_status']) ?> </td>
+                    <td><?php echo ucfirst($user['emp_name']);?></td>
+                    <td><?php echo ucfirst($user['position']);?></td>
                 </tr>
                 <?php
                 $serialNumber++;
@@ -110,14 +100,3 @@ if($result){
         $('#myTable').DataTable();
     });
     </script>
-
-
-
-
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
-    </script>
-</body>
-
-</html>

@@ -229,10 +229,23 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text"><i class="fa fa-caret-down fa-lg"></i></span>
                     </div>
-                        <select class="custom-select mb-2" name="role" required>
-                            <option value="admin">Admin</option>
-                            <option value="manager">Manager</option>
-                            <option selected value ="user">User</option>
+                        <select class="custom-select mb-2" name="role" required id="role">
+                            <option  value="admin">Admin</option>
+                            <option  value="manager">Manager</option>
+                            <option  value ="user">User</option>
+                        </select>
+                </div>
+            </div>
+            <div class="form-group" id="departmentDiv">
+                <label for="" >Select a department:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" ><i class="fa fa-caret-down fa-lg" ></i></span>
+                    </div>
+                        <select class="custom-select mb-2" name="department" required >
+                            <option value="it_dept">Information and Technology</option>
+                            <option value="hr_dept">Human Resource</option>
+                            <option value="finance_dept">Finance</option>
                         </select>
                 </div>
             </div>
@@ -253,7 +266,28 @@
 
 
 
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous">
+    </script>
 
+    <!-- script for showing department option when manager or user is selected -->
+    <script>
+        
+        $(document).ready (function(){
+            $('#departmentDiv').hide();
+        
+        $('#role'). on('change', function(){
+            var selectedRole = $(this).val();
+            if(selectedRole === 'manager' || selectedRole ==='user'){
+                $('#departmentDiv').show();
+            }else{
+                $('#departmentDiv').hide();
+            };
+        });
+    });
+
+    </script>
+    <!-- script ends here -->
 
 
 

@@ -1,7 +1,6 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+
 
 require_once 'db_connection.php';
 
@@ -14,20 +13,40 @@ if(!isset($_SESSION['email']) || $_SESSION['loggedin'] !== true){
 }
 include 'name_on_profile.php';
 
-$token = $_GET['token'];
-$query = "SELECT * from registrationdata WHERE token = '$token'";
+$tokenofEmployee = $_GET['token'];
+$query = "SELECT * from registrationdata WHERE token = '$tokenofEmployee'";
 $result = mysqli_query($conn, $query);
 
 $user = mysqli_fetch_assoc($result);
+$name = $user['name'];
+$tokenofloggedIn = $user['token'];
+$email = $user['email'];
+$number = $user['number'];
+
 
 
 if(isset($_POST['submit'])){
     $role_select = mysqli_real_escape_string($conn, $_POST['role_select']);
     $verification_select = mysqli_real_escape_string($conn, $_POST['verification_select']);
+    $department_select= mysqli_real_escape_string($conn, $_POST['department_select']);
+    $timestamp = date('Y-m-d H:i:s'); 
 
-    $updateQuery = "UPDATE registrationdata SET role = '$role_select', verification_status = '$verification_select', updated_at = NOW() WHERE token = '$token' ";
-    $updateresult = mysqli_query($conn, $updateQuery);
-
+    $selectedOption = $_POST['department_select'];
+    if(($role_select === 'manager' || $role_select=== 'user')  && $verification_select === 'verified'){
+        $updateQuery = "UPDATE registrationdata SET role = '$role_select', department= '$department_select', verification_status = '$verification_select', updated_at = NOW() WHERE token = '$tokenofEmployee' ";
+        $updateresult = mysqli_query($conn, $updateQuery);    
+        $queryforDeptInsert = "INSERT INTO $selectedOption (email, emp_name, number, position, token, created_at, updated_at)VALUES('$email','$name','$number', '$role_select', '$tokenofEmployee', '$timestamp', '$timestamp')";
+        $queryforDeptInsertresult = mysqli_query($conn, $queryforDeptInsert);
+        if( $updateresult && $queryforDeptInsertresult){
+            $_SESSION['success'] = "Role and status has been updated.";
+            header("location:verified_employees.php");
+        }else{
+            $_SESSION['failed'] = "Role and status has not been updated due to some technical problems.";
+            header("location:employee_info.php");
+        }
+    }elseif(($role_select === 'manager' || $role_select === 'user') && $verification_select === 'unverify'){
+        $updateQuery = "UPDATE registrationdata SET role = '$role_select', department= '$department_select', verification_status = '$verification_select', updated_at = NOW() WHERE token = '$tokenofEmployee' ";
+        $updateresult = mysqli_query($conn, $updateQuery);
         if($updateresult){
             $_SESSION['success'] = "Role and status has been updated.";
             header("location:verified_employees.php");
@@ -35,6 +54,29 @@ if(isset($_POST['submit'])){
             $_SESSION['failed'] = "Role and status has not been updated due to some technical problems.";
             header("location:employee_info.php");
         }
+    }elseif(($verification_select === 'verified' || $verification_select === 'unverify') && $role_select === 'admin'){
+        $updateQuery = "UPDATE registrationdata SET role = '$role_select', department= NULL, verification_status = '$verification_select', updated_at = NOW() WHERE token = '$tokenofEmployee' ";
+        $updateresult = mysqli_query($conn, $updateQuery);
+        if($updateresult){
+            $_SESSION['success'] = "Role and status has been updated.";
+            header("location:verified_employees.php");
+        }else{
+            $_SESSION['failed'] = "Role and status has not been updated due to some technical problems.";
+            header("location:employee_info.php");
+        }
+    }else{
+        $updateQuery = "UPDATE registrationdata SET role = '$role_select', verification_status = '$verification_select', updated_at = NOW() WHERE token = '$tokenofEmployee' ";
+        $updateresult = mysqli_query($conn, $updateQuery);
+        if($updateresult){
+            $_SESSION['success'] = "Role and status has been updated.";
+            header("location:verified_employees.php");
+        }else{
+            $_SESSION['failed'] = "Role and status has not been updated due to some technical problems.";
+            header("location:employee_info.php");
+        }
+    }
+
+
 }
 
 
@@ -130,7 +172,7 @@ if(isset($_POST['submit'])){
     <div class="container text-center mt-3" style="display: grid; justify-content: space-around;">
         <label for="" style="background-color:aquamarine; border-radius:10px;" class="mt-2">Requested Values</label>
         <div class="row">
-            <div class="col">
+            <div class="col-sm-4">
                 <div class="card" style=" height: 80px;width: 411px;">
                     <div class="card-body">
                         <h5 class="card-title">Role</h5>
@@ -138,7 +180,25 @@ if(isset($_POST['submit'])){
                     </div>
                 </div>
             </div>
-            <div class="col">
+            <div class="col-sm-4 mr-2" id="department">
+                <div class="card" style=" height: 80px;width: 411px;">
+                    <div class="card-body">
+                        <h5 class="card-title">Department</h5>
+                        <p class="card-text">
+                            <?php
+                        if($user['department']=== 'it_dept'){
+                            echo "Information and Technology";
+                        }elseif($user['department']=== 'hr_dept'){
+                            echo "Human Resource";
+                        }elseif($user['department']=== 'finance_dept'){
+                            echo "Finance";
+                        }
+                        ?>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4 mr-2">
                 <div class="card" style="    height: 80px;width: 411px;">
                     <div class="card-body">
                         <h5 class="card-title">Verification Status</h5>
@@ -146,8 +206,6 @@ if(isset($_POST['submit'])){
                     </div>
                 </div>
             </div>
-
-
         </div>
     </div>
     <!-- field for role ends here -->
@@ -157,20 +215,31 @@ if(isset($_POST['submit'])){
         <div class="container text-center mt-3" style="display: grid; justify-content: space-around;">
             <label for="" style="background-color:aquamarine; border-radius:10px;" class="mt-2">Update Values</label>
             <div class="row">
-                <div class="col">
+                <div class="col-sm-4">
                     <div class="form-floating">
-                        <select class="form-select" name="role_select" id="floatingSelect"
+                        <select class="form-select" name="role_select" id="role"
                             aria-label="Floating label select example">
                             <option value="user">User</option>
-                            <option selected value="manager">Manager</option>
-                            <option value="admin">Admin</option>
+                            <option  value="manager">Manager</option>
+                            <option selected value="admin">Admin</option>
                         </select>
                         <label for="floatingSelect">Choose an option:</label>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col-sm-4" id="departmentDiv">
                     <div class="form-floating">
-                        <select class="form-select" name="verification_select" id="floatingSelect"
+                        <select class="form-select" name="department_select" id="floatingSelect"
+                            aria-label="Floating label select example">
+                            <option value="it_dept">Information and Technology</option>
+                            <option value="hr_dept">Human Resource</option>
+                            <option value="finance_dept">Finance</option>
+                        </select>
+                        <label for="floatingSelect">Choose an option:</label>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-floating">
+                        <select class="form-select" name="verification_select"  id="floatingSelect"
                             aria-label="Floating label select example">
                             <option value="verified">Verify</option>
                             <option selected value="unverify">Keep unverified</option>
@@ -179,6 +248,8 @@ if(isset($_POST['submit'])){
                     </div>
                 </div>
             </div>
+            <br>
+            
             <button name="submit" class="btn btn-info mt-2">Update</button>
             <?php
             if(isset($_SESSION['failed'])){
@@ -201,6 +272,40 @@ if(isset($_POST['submit'])){
         </div>
     </div> -->
     <!-- comment area ends -->
+
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous">
+    </script>
+     <!-- script for showing department option when manager or user is selected -->
+     <script>
+        
+        $(document).ready (function(){
+            $('#departmentDiv').hide();
+        
+        $('#role'). on('change', function(){
+            var selectedRole = $(this).val();
+            if(selectedRole === 'manager' || selectedRole ==='user'){
+                $('#departmentDiv').show();
+            }else{
+                $('#departmentDiv').hide();
+            };
+        });
+    });
+
+    </script>
+    <!-- script ends here -->
+
+    <!-- script to hide department field when role is admin -->
+    <script>
+        var departmentField = document.getElementById('department');
+        var role = '<?php echo $user['role']; ?>'
+
+        if(role === 'admin'){
+            departmentField.style.display = 'none';
+        }
+    </script>
+    <!-- script ends -->
 
 
 

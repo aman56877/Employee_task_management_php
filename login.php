@@ -50,26 +50,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // validation to allow verified manager in manager page
         }elseif(strpos($user['verification_status'], "verified")!==false && strpos($user['role'], "manager")!==false){
-            // Verify the entered password with the stored hashed password
-            if (password_verify($password, $user['password'])) {
-                // Passwords match, login successful
+            if($user['department']=== 'it_dept'){
+                // Verify the entered password with the stored hashed password
+                if (password_verify($password, $user['password'])) {
+                    // Passwords match, login successful
+    
+                    // Start a session or set a cookie to maintain the user's logged-in state
+                    $_SESSION['token'] = $user['token'];
+                    $_SESSION['email'] = $user['email'];
+                    $_SESSION['manager_page'] = true;
+    
+                    // Redirect the user to the appropriate page after login
+                    header("location:it_dept_for_manager.php");
+                    exit();
+                } else {
+                    // Passwords do not match, display an error message
+                    $errorMessageforpassmismatch = "Wrong Password. Please enter the correct password";
+                    header("location:login.php?errorMessageforpassmismatch=" . urlencode(($errorMessageforpassmismatch)));
+                    exit();
+                }
 
-                // Start a session or set a cookie to maintain the user's logged-in state
-                $_SESSION['token'] = $user['token'];
-                $_SESSION['email'] = $user['email'];
-                $_SESSION['manager_page'] = true;
-
-                // Redirect the user to the appropriate page after login
-                header("location:manager.php");
-                exit();
-            } else {
-                // Passwords do not match, display an error message
-                $errorMessageforpassmismatch = "Wrong Password. Please enter the correct password";
-                header("location:login.php?errorMessageforpassmismatch=" . urlencode(($errorMessageforpassmismatch)));
-                exit();
+            }elseif($user['department'] === 'hr_dept'){
+                // Verify the entered password with the stored hashed password
+                if (password_verify($password, $user['password'])) {
+                    // Passwords match, login successful
+    
+                    // Start a session or set a cookie to maintain the user's logged-in state
+                    $_SESSION['token'] = $user['token'];
+                    $_SESSION['email'] = $user['email'];
+                    $_SESSION['manager_page'] = true;
+    
+                    // Redirect the user to the appropriate page after login
+                    header("location:hr_dept_for_manager.php");
+                    exit();
+                } else {
+                    // Passwords do not match, display an error message
+                    $errorMessageforpassmismatch = "Wrong Password. Please enter the correct password";
+                    header("location:login.php?errorMessageforpassmismatch=" . urlencode(($errorMessageforpassmismatch)));
+                    exit();
+                }
+            }elseif($user['department'] === 'finance_dept'){
+                // Verify the entered password with the stored hashed password
+                if (password_verify($password, $user['password'])) {
+                    // Passwords match, login successful
+    
+                    // Start a session or set a cookie to maintain the user's logged-in state
+                    $_SESSION['token'] = $user['token'];
+                    $_SESSION['email'] = $user['email'];
+                    $_SESSION['manager_page'] = true;
+    
+                    // Redirect the user to the appropriate page after login
+                    header("location:finance_dept_for_manager.php");
+                    exit();
+                } else {
+                    // Passwords do not match, display an error message
+                    $errorMessageforpassmismatch = "Wrong Password. Please enter the correct password";
+                    header("location:login.php?errorMessageforpassmismatch=" . urlencode(($errorMessageforpassmismatch)));
+                    exit();
+                }
             }
-
-
         // validation to allow verified user in user page
         }elseif(strpos($user['verification_status'], "verified")!==false && strpos($user['role'], "user")!==false){
             // Verify the entered password with the stored hashed password
