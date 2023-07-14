@@ -6,38 +6,53 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 session_start();
-if(!isset($_SESSION['email']) || $_SESSION['manager_page']!==true){
+if(!isset($_SESSION['email']) || $_SESSION['user_page']!==true){
     header("location:login.php");
 }
 require_once 'db_connection.php';
 
-$tokenofManager = $_SESSION['token'];
-$queryforManagerToken = "SELECT * from registrationdata WHERE token = '$tokenofManager'";
-$resultforManagerToken = mysqli_query($conn, $queryforManagerToken);
-
-$ManagerToken = mysqli_fetch_assoc($resultforManagerToken);
+include 'name_on_profile.php';
 
 
-$query = "SELECT * from finance_dept WHERE position = 'user'";
-$result = mysqli_query($conn, $query);
+$tokenofUser = $_SESSION['token'];
+$queryforUserToken = "SELECT * from registrationdata WHERE token = '$tokenofUser'";
+$resultforUserToken = mysqli_query($conn, $queryforUserToken);
+$UserToken = mysqli_fetch_assoc($resultforUserToken);
+$userDept = $UserToken['department'];
 
-$users = array();
-
-if($result){
-    while ($row = mysqli_fetch_assoc($result)){
-        $users[] = $row;
+// code for the table to show all tasks
+if($userDept === 'hr_dept'){
+    // code to show all tasks starts
+    $querytoShowAllTasks = "SELECT * from hr_tasks WHERE employee_token = '$tokenofUser'";
+    $querytoShowAllTasksResult = mysqli_query($conn, $querytoShowAllTasks);
+    $querytoShowAllTasksResultFinal = array();
+    if($querytoShowAllTasksResult){
+        while($row = mysqli_fetch_assoc($querytoShowAllTasksResult)){
+            $querytoShowAllTasksResultFinal[] = $row;
+        }
     }
-}else{
-    echo "Database error:" . mysqli_error($conn);
+    }elseif($userDept === 'it_dept'){
+    // code to show all tasks starts
+    $querytoShowAllTasks = "SELECT * from it_tasks WHERE employee_token = '$tokenofUser'";
+    $querytoShowAllTasksResult = mysqli_query($conn, $querytoShowAllTasks);
+    $querytoShowAllTasksResultFinal = array();
+    if($querytoShowAllTasksResult){
+        while($row = mysqli_fetch_assoc($querytoShowAllTasksResult)){
+            $querytoShowAllTasksResultFinal[] = $row;
+        }
+    }
+    }elseif($userDept === 'finance_dept'){
+    // code to show all tasks starts
+    $querytoShowAllTasks = "SELECT * from finance_tasks WHERE employee_token = '$tokenofUser'";
+    $querytoShowAllTasksResult = mysqli_query($conn, $querytoShowAllTasks);
+    $querytoShowAllTasksResultFinal = array();
+    if($querytoShowAllTasksResult){
+        while($row = mysqli_fetch_assoc($querytoShowAllTasksResult)){
+            $querytoShowAllTasksResultFinal[] = $row;
+        }
+    }
 }
-
-
-
-
-
-
-
-
+// ends here
 ?>
 
 <!DOCTYPE html>
@@ -77,25 +92,19 @@ if($result){
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="manager.php">Dashboard</a>
+                        <a class="nav-link " aria-current="page" href="user.php">Dashboard</a>
                     </li>
                     <li>
-                        <a class="nav-link active" aria-current="page" href="finance_dept_for_manager.php">Department</a>
+                        <a class="nav-link active" aria-current="page" href="user_all_tasks.php">All Tasks</a>
                     </li>
                     <li>
-                        <a class="nav-link" aria-current="page" href="manager_all_tasks.php">All Tasks</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" aria-current="page" href="task_reports.php">Submitted Reports</a>
-                    </li>
-                    <li>
-                        <div class="dropdown" style="position: relative; left: 500px;">
+                        <div class="dropdown" style="position: relative; left: 750px;">
                             <button class="btn btn-outline-success dropdown-toggle" type="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                <?php echo $ManagerToken['name']; ?>
+                                <?php echo $UserToken['name']; ?>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="my_profile.php">My Profile</a></li>
+                                <li><a class="dropdown-item" href="my_profile_for_user.php">My Profile</a></li>
                                 <li><a class="dropdown-item" href="logout.php">Logout</a></li>
                                 <li><a class="dropdown-item" href="#">Something else here</a></li>
                             </ul>
@@ -107,7 +116,6 @@ if($result){
     </nav>
     <!-- navbar ends -->
 
-
 <!-- Table starts -->
 <div class="container">
     <table id="myTable" class="display">
@@ -115,26 +123,27 @@ if($result){
             <tr>
                 <th>S.No.</th>
                 <th>Name</th>
-                <th>Total Assigned Tasks</th>
+                <th>Question</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
             <?php
                 $serialNumber = 1;
-                 foreach($users as $user): 
-                 ?>
+                 foreach($querytoShowAllTasksResultFinal as $user): 
+                    ?>
             <tr>
                 <td> <?php echo $serialNumber ?> </td>
-                <td><a style="color: black;"
-                        href="employees_of_manager.php?token=<?php echo $user['token']; ?>"><?php echo $user['emp_name'];?></a>
+                <td><a style="color: black;" href="task_submit_by_user.php?task_token=<?php echo $user['task_token']; ?>"><?php echo ucfirst($user['task_name']);?></a></td>
+                <td><a style="color: black;" href="task_file/<?php echo ($user['task_address']); ?>" target="_blank"><?php echo ucfirst($user['task_address']);?></a></td>
+                <td> <?php
+                if($user['report'] === NULL){
+                    echo "Not submitted";
+                }else{
+                    echo "Submitted";
+                }
+                ?> 
                 </td>
-                <td><?php 
-                $userToken = $user['token'];
-                $queryforTotalTasks = "SELECT * from finance_tasks WHERE employee_token = '$userToken'";
-                $queryforTotalTasksResult = mysqli_query($conn, $queryforTotalTasks);
-                $queryforTotalTasksResultFinal = mysqli_num_rows($queryforTotalTasksResult);
-                echo $queryforTotalTasksResultFinal;
-                ?></td>
             </tr>
             <?php
                 $serialNumber++;

@@ -68,7 +68,7 @@ $email = mysqli_real_escape_string($conn, $_POST['email']);
 $name = mysqli_real_escape_string($conn, $_POST['name']);
 $role = mysqli_real_escape_string($conn, $_POST['role']);
 $department = mysqli_real_escape_string($conn, $_POST['department']);
-$defaultImage = 'images/default_profile.jpg';
+$defaultImage = 'default_profile.jpg';
 $password = mysqli_real_escape_string($conn, $_POST['password']);
 if (strlen($password) < 8) {
     // Password Hashing

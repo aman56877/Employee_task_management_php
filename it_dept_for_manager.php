@@ -12,7 +12,7 @@ if(!isset($_SESSION['email']) || $_SESSION['manager_page']!==true){
 require_once 'db_connection.php';
 
 $tokenofManager = $_SESSION['token'];
-$queryforManagerToken = "SELECT * from it_dept WHERE token = '$tokenofManager'";
+$queryforManagerToken = "SELECT * from registrationdata WHERE token = '$tokenofManager'";
 $resultforManagerToken = mysqli_query($conn, $queryforManagerToken);
 
 $ManagerToken = mysqli_fetch_assoc($resultforManagerToken);
@@ -83,10 +83,16 @@ if($result){
                         <a class="nav-link active" aria-current="page" href="it_dept_for_manager.php">Department</a>
                     </li>
                     <li>
-                        <div class="dropdown" style="position: relative; left: 830px;">
+                        <a class="nav-link" aria-current="page" href="manager_all_tasks.php">All Tasks</a>
+                    </li>
+                    <li>
+                        <a class="nav-link" aria-current="page" href="task_reports.php">Submitted Reports</a>
+                    </li>
+                    <li>
+                        <div class="dropdown" style="position: relative; left: 500px;">
                             <button class="btn btn-outline-success dropdown-toggle" type="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                <?php echo $ManagerToken['emp_name']; ?>
+                                <?php echo $ManagerToken['name']; ?>
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="my_profile.php">My Profile</a></li>
@@ -100,7 +106,6 @@ if($result){
         </div>
     </nav>
     <!-- navbar ends -->
-</body>
 
 
 <!-- Table starts -->
@@ -110,7 +115,7 @@ if($result){
             <tr>
                 <th>S.No.</th>
                 <th>Name</th>
-                <th>Total Task</th>
+                <th>Total Assigned Tasks</th>
             </tr>
         </thead>
         <tbody>
@@ -121,9 +126,15 @@ if($result){
             <tr>
                 <td> <?php echo $serialNumber ?> </td>
                 <td><a style="color: black;"
-                        href="assign_tasks_by_manager.php?token=<?php echo $user['token']; ?>"><?php echo $user['emp_name'];?></a>
+                        href="employees_of_manager.php?token=<?php echo $user['token']; ?>"><?php echo $user['emp_name'];?></a>
                 </td>
-                <td><?php echo ucfirst($user['token']);?></td>
+                <td><?php 
+                $userToken = $user['token'];
+                $queryforTotalTasks = "SELECT * from it_tasks WHERE employee_token = '$userToken'";
+                $queryforTotalTasksResult = mysqli_query($conn, $queryforTotalTasks);
+                $queryforTotalTasksResultFinal = mysqli_num_rows($queryforTotalTasksResult);
+                echo $queryforTotalTasksResultFinal;
+                ?></td>
             </tr>
             <?php
                 $serialNumber++;
@@ -149,3 +160,6 @@ $(document).ready(function() {
     $('#myTable').DataTable();
 });
 </script>
+
+</body>
+</html>

@@ -11,17 +11,156 @@ if(!isset($_SESSION['email']) || $_SESSION['manager_page']!==true){
 }
 
 
-$tokenofUser = $_GET['token'];
-$query = "SELECT * from it_dept WHERE token = '$tokenofUser'";
-$UserTokenResult = mysqli_query($conn, $query);
-$userData = mysqli_fetch_assoc($UserTokenResult);
-
+$tokenofTask = $_GET['task_token'];
 
 $tokenofManager = $_SESSION['token'];
-$queryforManagerToken = "SELECT * from it_dept WHERE token = '$tokenofManager'";
+$queryforManagerToken = "SELECT * from registrationdata WHERE token = '$tokenofManager'";
 $resultforManagerToken = mysqli_query($conn, $queryforManagerToken);
 
 $ManagerToken = mysqli_fetch_assoc($resultforManagerToken);
+$ManagerDepartment = $ManagerToken['department'];
+
+
+// code to get task details starts
+if($ManagerDepartment === 'it_dept'){
+    $querytogetTaskName = "SELECT * FROM it_tasks WHERE task_token = '$tokenofTask'";
+    $querytogetTaskNameResult = mysqli_query($conn, $querytogetTaskName);
+    $querytogetTaskNameResultFinal = mysqli_fetch_assoc($querytogetTaskNameResult);
+
+    $querytogetallEmployees = "SELECT * FROM it_dept WHERE position = 'user'";
+    $querytogetallEmployeesResult = mysqli_query($conn, $querytogetallEmployees);
+    $querytogetallEmployeesResultFinal = array();
+
+    if($querytogetallEmployeesResult){
+        while($row = mysqli_fetch_assoc($querytogetallEmployeesResult)){
+            $querytogetallEmployeesResultFinal[] = $row;
+        }
+    }
+
+        // to check the task assigned or not
+    if($querytogetTaskNameResultFinal['employee_token'] === NULL && $querytogetTaskNameResultFinal['status']=== 'completed'){
+        $statusofTask = "Completed";
+        $disableAssignTaskBUtton = false;
+    }elseif($querytogetTaskNameResultFinal['employee_token'] === NULL && $querytogetTaskNameResultFinal['status']=== NULL){
+        $statusofTask = "Not assigned";
+        $disableAssignTaskBUtton = false;
+    }else{
+        $statusofTask = "Assigned";
+        $disableAssignTaskBUtton = true;
+    }
+    // ends here
+
+    // to assign task
+    if(isset($_POST['submit'])){
+        $EmployeeToken = mysqli_real_escape_string($conn, $_POST['selectEmployee']);
+        $querytoassignTask = "UPDATE it_tasks SET employee_token = '$EmployeeToken', if_employee = 'yes', updated_at = NOW() WHERE task_token = '$tokenofTask'";
+        $querytoassignTaskResult = mysqli_query($conn, $querytoassignTask);
+
+        if($querytoassignTaskResult){
+            $_SESSION['task_assigned'] = "Task has been assigned";
+            header("location:assign_tasks_by_manager.php?task_token=" . $tokenofTask);
+        }else{
+            $_SESSION['task_notAssigned'] = "Task has not been assigned due to technical problems";
+            header("location:assign_tasks_by_manager.php?task_token=" . $tokenofTask);
+        }
+    }
+    // ends here
+}elseif($ManagerDepartment === 'hr_dept'){
+    $querytogetTaskName = "SELECT * FROM hr_tasks WHERE task_token = '$tokenofTask'";
+    $querytogetTaskNameResult = mysqli_query($conn, $querytogetTaskName);
+    $querytogetTaskNameResultFinal = mysqli_fetch_assoc($querytogetTaskNameResult);
+
+    $querytogetallEmployees = "SELECT * FROM hr_dept WHERE position = 'user'";
+    $querytogetallEmployeesResult = mysqli_query($conn, $querytogetallEmployees);
+    $querytogetallEmployeesResultFinal = array();
+
+    if($querytogetallEmployeesResult){
+        while($row = mysqli_fetch_assoc($querytogetallEmployeesResult)){
+            $querytogetallEmployeesResultFinal[] = $row;
+        }
+    }
+
+
+    // to check the task assigned or not
+    if($querytogetTaskNameResultFinal['employee_token'] === NULL && $querytogetTaskNameResultFinal['status']=== 'completed'){
+        $statusofTask = "Completed";
+        $disableAssignTaskBUtton = false;
+    }elseif($querytogetTaskNameResultFinal['employee_token'] === NULL && $querytogetTaskNameResultFinal['status']=== NULL){
+        $statusofTask = "Not assigned";
+        $disableAssignTaskBUtton = false;
+    }else{
+        $statusofTask = "Assigned";
+        $disableAssignTaskBUtton = true;
+    }
+    // ends here
+
+
+    // to assign task
+    if(isset($_POST['submit'])){
+        $EmployeeToken = mysqli_real_escape_string($conn, $_POST['selectEmployee']);
+        $querytoassignTask = "UPDATE hr_tasks SET employee_token = '$EmployeeToken', if_employee = 'yes', updated_at = NOW() WHERE task_token = '$tokenofTask'";
+        $querytoassignTaskResult = mysqli_query($conn, $querytoassignTask);
+
+        if($querytoassignTaskResult){
+            $_SESSION['task_assigned'] = "Task has been assigned";
+            header("location:assign_tasks_by_manager.php?task_token=" . $tokenofTask);
+        }else{
+            $_SESSION['task_notAssigned'] = "Task has not been assigned due to technical problems";
+            header("location:assign_tasks_by_manager.php?task_token=" . $tokenofTask);
+        }
+    }
+    // ends here
+}elseif($ManagerDepartment === 'finance_dept'){
+    $querytogetTaskName = "SELECT * FROM finance_tasks WHERE task_token = '$tokenofTask'";
+    $querytogetTaskNameResult = mysqli_query($conn, $querytogetTaskName);
+    $querytogetTaskNameResultFinal = mysqli_fetch_assoc($querytogetTaskNameResult);
+
+    $querytogetallEmployees = "SELECT * FROM finance_dept WHERE position = 'user'";
+    $querytogetallEmployeesResult = mysqli_query($conn, $querytogetallEmployees);
+    $querytogetallEmployeesResultFinal = array();
+
+    if($querytogetallEmployeesResult){
+        while($row = mysqli_fetch_assoc($querytogetallEmployeesResult)){
+            $querytogetallEmployeesResultFinal[] = $row;
+        }
+    }
+
+
+    // to check the task assigned or not
+    if($querytogetTaskNameResultFinal['employee_token'] === NULL && $querytogetTaskNameResultFinal['status']=== 'completed'){
+        $statusofTask = "Completed";
+        $disableAssignTaskBUtton = true;
+    }elseif($querytogetTaskNameResultFinal['employee_token'] === NULL && $querytogetTaskNameResultFinal['status']=== NULL){
+        $statusofTask = "Not assigned";
+        $disableAssignTaskBUtton = false;
+    }else{
+        $statusofTask = "Assigned";
+        $disableAssignTaskBUtton = true;
+    }
+    // ends here
+   
+
+
+        // to assign task
+    if(isset($_POST['submit'])){
+        $EmployeeToken = mysqli_real_escape_string($conn, $_POST['selectEmployee']);
+        $querytoassignTask = "UPDATE finance_tasks SET employee_token = '$EmployeeToken', if_employee = 'yes', updated_at = NOW() WHERE task_token = '$tokenofTask'";
+        $querytoassignTaskResult = mysqli_query($conn, $querytoassignTask);
+
+        if($querytoassignTaskResult){
+            $_SESSION['task_assigned'] = "Task has been assigned";
+            header("location:assign_tasks_by_manager.php?task_token=" . $tokenofTask);
+        }else{
+            $_SESSION['task_notAssigned'] = "Task has not been assigned due to technical problems";
+            header("location:assign_tasks_by_manager.php?task_token=" . $tokenofTask);
+        }
+    }
+    // ends here   
+}
+
+// ends here
+
+
 
 
 
@@ -78,14 +217,32 @@ $ManagerToken = mysqli_fetch_assoc($resultforManagerToken);
                     <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="manager.php">Dashboard</a>
                     </li>
+                    <?php
+                        if($ManagerDepartment === 'it_dept'): ?>
+                            <li>
+                                <a class="nav-link " aria-current="page" href="it_dept_for_manager.php">Department</a>
+                            </li>
+                        <?php elseif($ManagerDepartment === 'hr_dept'): ?>
+                            <li>
+                                <a class="nav-link " aria-current="page" href="hr_dept_for_manager.php">Department</a>
+                            </li>
+                        <?php elseif($ManagerDepartment === 'finance_dept'):?>
+                            <li>
+                                <a class="nav-link " aria-current="page" href="finance_dept_for_manager.php">Department</a>
+                            </li>
+                        
+                        <?php endif;?>
                     <li>
-                        <a class="nav-link active" aria-current="page" href="it_dept_for_manager.php">Department</a>
+                        <a class="nav-link active" aria-current="page" href="manager_all_tasks.php">All Tasks</a>
                     </li>
                     <li>
-                        <div class="dropdown" style="position: relative; left: 830px;">
+                        <a class="nav-link" aria-current="page" href="task_reports.php">Submitted Reports</a>
+                    </li>
+                    <li>
+                        <div class="dropdown" style="position: relative; left: 500px;">
                             <button class="btn btn-outline-success dropdown-toggle" type="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                <?php echo $ManagerToken['emp_name']; ?>
+                                <?php echo $ManagerToken['name']; ?>
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="my_profile.php">My Profile</a></li>
@@ -100,7 +257,7 @@ $ManagerToken = mysqli_fetch_assoc($resultforManagerToken);
     </nav>
     <!-- navbar ends -->
 
-    <!-- assign tasks field start -->
+    <!--  task info field start -->
     <div class="container">
         <div class="container text-center mt-5">
             <div class="row">
@@ -108,15 +265,15 @@ $ManagerToken = mysqli_fetch_assoc($resultforManagerToken);
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Name</h5>
-                            <p class="card-text"><?php echo $userData['emp_name']; ?></p>
+                            <p class="card-text"><?php echo $querytogetTaskNameResultFinal['task_name']; ?></p>
                         </div>
                     </div>
                 </div>
                 <div class="col">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Total Assigned Tasks</h5>
-                            <p class="card-text">h</p>
+                            <h5 class="card-title">Status</h5>
+                            <p class="card-text"><?php  echo $statusofTask;  ?></p>
                         </div>
                     </div>
                 </div>
@@ -131,9 +288,63 @@ $ManagerToken = mysqli_fetch_assoc($resultforManagerToken);
             </div>
         </div>
     </div>
-    <!-- assign tasks field ends -->
+    <!-- task info field ends -->
+
+    <!-- assign task to employee -->
+    <div class="container border mt-5">
+        <form action="" method="post">
+            <h4><label for="">Assign this task...</label></h4>
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="inputGroupSelect01">Options</label>
+                <select class="form-select" id="inputGroupSelect01" name="selectEmployee">
+                    <?php foreach($querytogetallEmployeesResultFinal as $user):  ?>
+                    <option value="<?php echo $user['token']; ?>">
+                        <?php
+                            echo $user['emp_name'];
+                            ?>
+                    </option>
+                    <?php endforeach;  ?>
+                </select>
+            </div>
+            <button name="submit" class="btn btn-info" <?php if ($disableAssignTaskBUtton) echo 'disabled' ;?>>Assign Task</button>
+            <?php
+                if(isset($_SESSION['task_assigned'])){
+                    echo $_SESSION['task_assigned'];
+                    echo "<script> setTimeout(function(){unsetSession();}, 5000); </script>";
+                    if(isset($_GET['unset'])&& $_GET['unset']==='1'){
+                        unset($_SESSION['task_assigned']);
+                    }
+                }else{
+                    echo '';
+                }
+                if(isset($_SESSION['task_notAssigned'])){
+                    echo $_SESSION['task_notAssigned'];
+                    echo "<script> setTimeout(function(){unsetSession();}, 5000); </script>";
+                    if(isset($_GET['unset'])&& $_GET['unset']==='1'){
+                        unset($_SESSION['task_notAssigned']);
+                    }
+                }else{
+                    echo '';
+                }
 
 
+            ?>
+        </form>
+    </div>
+    <!-- assign task to employee ends-->
+
+
+    <?php
+    echo 
+    '<script>
+        function unsetSession(){
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "assign_tasks_by_manager.php?unset=1", true)
+            xhr.send();
+            
+        }
+    </script>';
+    ?>
 </body>
 
 </html>

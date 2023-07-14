@@ -4,6 +4,13 @@ if(!isset($_SESSION['email']) || $_SESSION['manager_page']!==true){
     header("location:login.php");
 }
 
+require_once 'db_connection.php';
+
+$tokenofManager = $_SESSION['token'];
+$queryforManagerToken = "SELECT * from registrationdata WHERE token = '$tokenofManager'";
+$resultforManagerToken = mysqli_query($conn, $queryforManagerToken);
+$ManagerToken = mysqli_fetch_assoc($resultforManagerToken);
+$managerDept = $ManagerToken['department'];
 
 
 ?>
@@ -37,7 +44,7 @@ if(!isset($_SESSION['email']) || $_SESSION['manager_page']!==true){
 
 <body>
     <!-- navbar starts -->
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom border-bottom-dark mb-2">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Navbar</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -50,20 +57,43 @@ if(!isset($_SESSION['email']) || $_SESSION['manager_page']!==true){
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="manager.php">Dashboard</a>
                     </li>
+                    <?php
+                        if($managerDept === 'it_dept'): ?>
+                            <li>
+                                <a class="nav-link " aria-current="page" href="it_dept_for_manager.php">Department</a>
+                            </li>
+                        <?php elseif($managerDept === 'hr_dept'): ?>
+                            <li>
+                                <a class="nav-link " aria-current="page" href="hr_dept_for_manager.php">Department</a>
+                            </li>
+                        <?php elseif($managerDept === 'finance_dept'):?>
+                            <li>
+                                <a class="nav-link " aria-current="page" href="finance_dept_for_manager.php">Department</a>
+                            </li>
+                        
+                        <?php endif;?>
                     <li>
-                    <a class="nav-link" aria-current="page" href="it_dept_for_manager.php">Department</a>
+                        <a class="nav-link" aria-current="page" href="manager_all_tasks.php">All Tasks</a>
                     </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link disabled">Disabled</a>
+                    <li>
+                        <a class="nav-link" aria-current="page" href="task_reports.php">Submitted Reports</a>
+                    </li>
+                    <li>
+                        <div class="dropdown" style="position: relative; left: 500px;">
+                            <button class="btn btn-outline-success dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <?php echo $ManagerToken['name']; ?>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="my_profile.php">My Profile</a></li>
+                                <li><a class="dropdown-item" href="logout.php">Logout</a></li>
+                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            </ul>
+                        </div>
                     </li>
                 </ul>
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
             </div>
-                    </div>
+        </div>
     </nav>
     <!-- navbar ends -->
 </body>
